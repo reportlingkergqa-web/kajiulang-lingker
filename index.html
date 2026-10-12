@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IHsuperappgqa</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navigasi utama">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">IH</span>
+          <div>
+            <h1>IHsuperappgqa</h1>
+            <p>GQA Workflow</p>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Menu aplikasi">
+          <button class="nav-item active" type="button" data-view="management">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+            </svg>
+            <span>Kaji Ulang Manajemen</span>
+          </button>
+          <button class="nav-item" type="button" data-view="calculator">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <rect x="4" y="3" width="16" height="18" rx="2" />
+              <path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01" />
+            </svg>
+            <span>Perhitungan Sampel</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-note">
+          <strong>Format</strong>
+          <span>7.1/FR/GQA/05-Rev 00</span>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <section class="view active" id="management-view" aria-labelledby="management-title">
+          <header class="page-header">
+            <div>
+              <p class="section-label">Menu 1</p>
+              <h2 id="management-title">Kaji Ulang Manajemen</h2>
+              <p>Susun dokumen kaji ulang analisis dari pemetaan risk register secara dinamis.</p>
+            </div>
+            <button class="button primary" type="button" id="print-document">
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <path d="M6 14h12v8H6z" />
+              </svg>
+              <span>Cetak Dokumen</span>
+            </button>
+          </header>
+
+          <form class="form-grid" id="management-form">
+            <label class="field">
+              <span>Nama Perusahaan</span>
+              <input id="company-name" type="text" placeholder="Contoh: PT GQA Indonesia" autocomplete="organization" />
+            </label>
+            <label class="field">
+              <span>Alamat</span>
+              <textarea id="company-address" rows="3" placeholder="Alamat lengkap lokasi pengujian"></textarea>
+            </label>
+          </form>
+
+          <section class="panel parameter-panel" aria-labelledby="parameter-title">
+            <div class="panel-header">
+              <div>
+                <p class="section-label">Risk Register</p>
+                <h3 id="parameter-title">Parameter Pengujian</h3>
+              </div>
+              <button class="button secondary" type="button" id="add-row">
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                <span>Tambah Parameter</span>
+              </button>
+            </div>
+
+            <div class="table-wrap">
+              <table class="parameter-table">
+                <thead>
+                  <tr>
+                    <th>Faktor Bahaya</th>
+                    <th>Parameter</th>
+                    <th>Metode Default</th>
+                    <th>Jumlah Sampel</th>
+                    <th aria-label="Aksi"></th>
+                  </tr>
+                </thead>
+                <tbody id="parameter-rows"></tbody>
+              </table>
+            </div>
+
+            <div class="empty-state" id="empty-state">
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <p>Tambahkan parameter pertama untuk mulai menyusun dokumen.</p>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="calculator-view" aria-labelledby="calculator-title">
+          <header class="page-header">
+            <div>
+              <p class="section-label">Menu 2</p>
+              <h2 id="calculator-title">Perhitungan Sampel Minimum</h2>
+              <p>Kalkulator instan tanpa penyimpanan data untuk psikososial dan personal sampling.</p>
+            </div>
+            <button class="button ghost" type="button" id="reset-calculator">
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M3 12a9 9 0 1 0 3-6.7M3 4v6h6" />
+              </svg>
+              <span>Reset</span>
+            </button>
+          </header>
+
+          <div class="calculator-shell" data-calculator="page"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="calculator-modal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <header class="modal-header">
+          <div>
+            <p class="section-label">Bypass Form</p>
+            <h2 id="modal-title">Kalkulator Sampel</h2>
+          </div>
+          <button class="icon-button" type="button" id="close-modal" aria-label="Tutup kalkulator">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+        <div class="calculator-shell" data-calculator="modal"></div>
+        <footer class="modal-actions">
+          <button class="button ghost" type="button" id="cancel-modal">Batal</button>
+          <button class="button primary" type="button" id="apply-calculation">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="m20 6-11 11-5-5" />
+            </svg>
+            <span>Terapkan ke Form</span>
+          </button>
+        </footer>
+      </section>
+    </div>
+
+    <template id="calculator-template">
+      <div class="tabs" role="tablist" aria-label="Jenis kalkulator sampel">
+        <button class="tab active" type="button" role="tab" aria-selected="true" data-tab="psychology">Parameter Psikologi</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-tab="personal">Personal Sampling</button>
+      </div>
+
+      <div class="calculator-grid">
+        <article class="calculator-card active" data-panel="psychology">
+          <div class="formula-block">
+            <span>Rumus Slovin</span>
+            <strong>n = N / (1 + N x e²)</strong>
+          </div>
+          <label class="field">
+            <span>Jumlah Total Populasi Karyawan (N)</span>
+            <input type="number" min="0" step="1" inputmode="numeric" data-psych-population placeholder="Masukkan jumlah karyawan" />
+          </label>
+          <fieldset class="field radio-group">
+            <legend>Margin of Error (e)</legend>
+            <label>
+              <input type="radio" name="psych-error" value="0.05" checked />
+              <span>5% (0.05)</span>
+            </label>
+            <label>
+              <input type="radio" name="psych-error" value="0.10" />
+              <span>10% (0.10)</span>
+            </label>
+          </fieldset>
+          <div class="result-card">
+            <span>Jumlah Sampel (n)</span>
+            <strong data-psych-result>0</strong>
+            <small>Pembulatan ke atas otomatis</small>
+          </div>
+        </article>
+
+        <article class="calculator-card" data-panel="personal">
+          <div class="formula-block">
+            <span>AIHA 2015 Strategy</span>
+            <strong>n = N x Z² x p(1-p) / ((N-1)d² + Z² x p(1-p))</strong>
+          </div>
+          <label class="field">
+            <span>Total SEG/HEG Parameter (N)</span>
+            <input type="number" min="0" step="1" inputmode="numeric" data-personal-total placeholder="Jumlah pekerja per area homogen" />
+          </label>
+          <div class="constant-grid" aria-label="Konstanta sistem">
+            <div><span>Z</span><strong>1.96</strong></div>
+            <div><span>p</span><strong>0.5</strong></div>
+            <div><span>d</span><strong>0.2</strong></div>
+          </div>
+          <div class="result-card split">
+            <div>
+              <span>Jumlah Minimum Sampel (n)</span>
+              <strong data-personal-result>0.00</strong>
+            </div>
+            <div>
+              <span>Pembulatan (n)</span>
+              <strong data-personal-rounded>0</strong>
+            </div>
+          </div>
+        </article>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
