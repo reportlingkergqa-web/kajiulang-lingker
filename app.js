@@ -409,7 +409,7 @@ function slug(value) {
     .slice(0, 60);
 }
 
-function buildDocumentHtml() {
+function buildDocumentHtml(signatureDataUrl) {
   const company = elements.companyName.value.trim() || "-";
   const address = elements.companyAddress.value.trim() || "-";
   const rows = documentRows();
