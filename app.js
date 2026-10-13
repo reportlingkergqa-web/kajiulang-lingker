@@ -409,7 +409,29 @@ function slug(value) {
     .slice(0, 60);
 }
 
-function buildDocumentHtml(signatureDataUrl) {
+
+async function loadSignatureBase64() {
+  const response = await fetch("./ttd-manajer.png");
+
+  if (!response.ok) {
+    throw new Error("Gambar tanda tangan tidak ditemukan.");
+  }
+
+  const blob = await response.blob();
+
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+
+    reader.readAsDataURL(blob);
+  });
+}
+
+
+async function buildDocumentHtml() {
+  const signatureBase64 = await loadSignatureBase64();
   const company = elements.companyName.value.trim() || "-";
   const address = elements.companyAddress.value.trim() || "-";
   const rows = documentRows();
@@ -489,20 +511,62 @@ function buildDocumentHtml(signatureDataUrl) {
       table.data th {
         text-align: center;
         background: #e9e9e9;
-      }
-      .signature {
-        width: 100%;
-        margin-top: 36px;
-      }
-      .signature td {
-        width: 50%;
-        height: 96px;
-        vertical-align: top;
-      }
+     
+
+.signature {
+  width: 100%;
+  margin-top: 36px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.signature td {
+  width: 50%;
+  height: 150px;
+  padding: 0;
+  vertical-align: top;
+  text-align: left;
+}
+
+.signature-title {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.signature-image {
+  display: block;
+  width: 125px;
+  height: 90px;
+  object-fit: contain;
+  object-position: left center;
+  margin: 0;
+}
+
+.signature-space {
+  height: 123px;
+}
+
+.signature-line {
+  display: block;
+  width: 180px;
+  border-bottom: 1px solid #111;
+  height: 1px;
+  margin-top: 0;
+}
+
+.signature-position {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  margin-top: 0;
+}
       .small {
         font-size: 11px;
       }
+
     </style>
+
+
   </head>
   <body>
     <div class="doc-header">
@@ -539,85 +603,112 @@ function buildDocumentHtml(signatureDataUrl) {
       </thead>
       <tbody>${rowHtml}</tbody>
     </table>
- 
-<table class="signature">
+
+
+
+<table
+  width="100%"
+  cellpadding="0"
+  cellspacing="0"
+  style="width:100%; border-collapse:collapse; margin-top:36px;"
+>
   <tr>
-    <td>
-      Mengetahui,
-      <img
-        src="${signatureDataUrl}"
-        alt="Tanda tangan Manajer Teknis"
-        style="width:150px;height:85px;object-fit:contain;display:block;margin:5px auto 0;"
-      />
-      <strong>Manajer Teknis</strong>
+    <!-- KOLOM KIRI -->
+    <td
+      width="50%"
+      valign="top"
+      style="width:50%; vertical-align:top; padding:0;"
+    >
+      <p style="font-family:Arial,sans-serif; font-size:14px; margin:0;">
+        Disusun oleh,
+      </p>
+
+      <table
+        cellpadding="0"
+        cellspacing="0"
+        style="border-collapse:collapse; margin:0;"
+      >
+        <tr>
+          <td
+            height="100"
+            valign="middle"
+            style="height:100px; vertical-align:middle; padding:0;"
+          >
+            <img
+              src="${signatureBase64}"
+              alt="Tanda tangan Manajer Teknis"
+              width="125"
+              height="90"
+              style="display:block; width:125px; height:90px;"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td
+            style="font-family:Arial,sans-serif; font-size:14px; padding:0;"
+          >
+            (Manajer Teknis)
+          </td>
+        </tr>
+      </table>
     </td>
-    <td>
-      Disetujui,
-      <div style="margin-top:100px;">
-        ________________________
-        </div>
-       </td>
-      </tr>
-    </table>
+
+    <!-- KOLOM KANAN -->
+    <td
+      width="50%"
+      valign="top"
+      style="width:50%; vertical-align:top; padding:0;"
+    >
+      <p style="font-family:Arial,sans-serif; font-size:14px; margin:0;">
+        Dikaji oleh,
+      </p>
+
+      <table
+        width="50%"
+        cellpadding="0"
+        cellspacing="0"
+        style="width:50%; border-collapse:collapse;"
+      >
+        <tr>
+          <td
+            height="122"
+            style="height:122px; padding:0; border-bottom:none;"
+          ></td>
+        </tr>
+        <tr>
+          <td
+            width="50"
+            style="width:50px; border-bottom:1px solid #111; height:1px; padding:0;"
+          ></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+
   </body>
 </html>`;
 }
 
-
 async function downloadDocument() {
   const rows = documentRows();
-
   if (!rows.length) {
-    window.alert(
-      "Tambahkan minimal satu parameter lengkap sebelum mencetak dokumen."
-    );
+    window.alert("Tambahkan minimal satu parameter lengkap sebelum mencetak dokumen.");
     return;
   }
 
-  try {
-    // Membaca gambar tanda tangan
-    const response = await fetch("./ttd%20manajer.png");
-
-    if (!response.ok) {
-      throw new Error("Gambar ttd manajer.png tidak ditemukan.");
-    }
-
-    const signatureBlob = await response.blob();
-
-    const signatureDataUrl = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () =>
-        reject(new Error("Gagal membaca gambar tanda tangan."));
-
-      reader.readAsDataURL(signatureBlob);
-    });
-
-    // Membuat dokumen beserta tanda tangan
-    const html = buildDocumentHtml(signatureDataUrl);
-
-    const blob = new Blob(["\ufeff", html], {
-      type: "application/msword;charset=utf-8"
-    });
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    const fileSlug =
-      slug(elements.companyName.value) || "dokumen-gqa";
-
-    link.href = url;
-    link.download = `Kaji-Ulang-${fileSlug}.doc`;
-
-    document.body.append(link);
-    link.click();
-    link.remove();
-
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch (error) {
-    window.alert("Gagal membuat dokumen: " + error.message);
-    console.error(error);
-  }
+  const html = await buildDocumentHtml();
+  const blob = new Blob(["\ufeff", html], { type: "application/msword;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const fileSlug = slug(elements.companyName.value) || "dokumen-gqa";
+  link.href = url;
+  link.download = `Kaji-Ulang-${fileSlug}.doc`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function bindEvents() {
