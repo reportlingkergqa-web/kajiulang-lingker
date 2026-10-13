@@ -539,35 +539,85 @@ function buildDocumentHtml() {
       </thead>
       <tbody>${rowHtml}</tbody>
     </table>
-
-    <table class="signature">
-      <tr>
-        <td>Disusun oleh,</td>
-        <td>Dikaji oleh,</td>
+ 
+<table class="signature">
+  <tr>
+    <td>
+      Mengetahui,
+      <img
+        src="${signatureDataUrl}"
+        alt="Tanda tangan Manajer Teknis"
+        style="width:150px;height:85px;object-fit:contain;display:block;margin:5px auto 0;"
+      />
+      <strong>Manajer Teknis</strong>
+    </td>
+    <td>
+      Disetujui,
+      <div style="margin-top:100px;">
+        ________________________
+        </div>
+       </td>
       </tr>
     </table>
   </body>
 </html>`;
 }
 
-function downloadDocument() {
+
+async function downloadDocument() {
   const rows = documentRows();
+
   if (!rows.length) {
-    window.alert("Tambahkan minimal satu parameter lengkap sebelum mencetak dokumen.");
+    window.alert(
+      "Tambahkan minimal satu parameter lengkap sebelum mencetak dokumen."
+    );
     return;
   }
 
-  const html = buildDocumentHtml();
-  const blob = new Blob(["\ufeff", html], { type: "application/msword;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  const fileSlug = slug(elements.companyName.value) || "dokumen-gqa";
-  link.href = url;
-  link.download = `Kaji-Ulang-${fileSlug}.doc`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  try {
+    // Membaca gambar tanda tangan
+    const response = await fetch("./ttd%20manajer.png");
+
+    if (!response.ok) {
+      throw new Error("Gambar ttd manajer.png tidak ditemukan.");
+    }
+
+    const signatureBlob = await response.blob();
+
+    const signatureDataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () =>
+        reject(new Error("Gagal membaca gambar tanda tangan."));
+
+      reader.readAsDataURL(signatureBlob);
+    });
+
+    // Membuat dokumen beserta tanda tangan
+    const html = buildDocumentHtml(signatureDataUrl);
+
+    const blob = new Blob(["\ufeff", html], {
+      type: "application/msword;charset=utf-8"
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const fileSlug =
+      slug(elements.companyName.value) || "dokumen-gqa";
+
+    link.href = url;
+    link.download = `Kaji-Ulang-${fileSlug}.doc`;
+
+    document.body.append(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) {
+    window.alert("Gagal membuat dokumen: " + error.message);
+    console.error(error);
+  }
 }
 
 function bindEvents() {
